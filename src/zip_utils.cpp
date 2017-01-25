@@ -2,9 +2,14 @@
 // Created by Yuanjun Xiong on 18/11/2015.
 //
 
-#include "utils.h"
+#include <opencv2/core/types_c.h>
+#include <string>
+#include <vector>
+#include "zip_utils.h"
 #include "zip.h"
 #include "easylogging++.h"
+
+using namespace std;
 
 void writeZipFile(vector<vector<uchar> >& data, string name_temp, string archive_name){
     int err=0;

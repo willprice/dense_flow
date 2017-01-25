@@ -49,19 +49,3 @@ void encodeFlowMap(const Mat& flow_map_x, const Mat& flow_map_y,
         memcpy(encoded_y.data(), flow_img_y.data, flow_img_y.total());
     }
 }
-
-void writeImages(vector<vector<uchar>> images, string name_temp){
-    for (int i = 0; i < images.size(); ++i){
-        char tmp[256];
-        sprintf(tmp, "_%05d.jpg", i+1);
-        FILE* fp;
-        fp = fopen((name_temp + tmp).c_str(), "wb");
-        fwrite( images[i].data(), 1, images[i].size(), fp);
-        fclose(fp);
-    }
-}
-
-bool fileExists(string path) {
-  struct stat buffer;
-  return (stat(path.c_str(), &buffer) == 0);
-}

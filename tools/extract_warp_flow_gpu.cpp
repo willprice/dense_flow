@@ -1,8 +1,14 @@
 #include "dense_flow.h"
-#include "utils.h"
+#include "zip_utils.h"
+#include <boost/filesystem.hpp>
+#include <image_writers.h>
+#include <file_utils.h>
+#include <cmd_utils.h>
 
 INITIALIZE_EASYLOGGINGPP
 
+using namespace std;
+using namespace boost::filesystem;
 using namespace cv::gpu;
 
 int main(int argc, char** argv){
@@ -22,35 +28,27 @@ int main(int argc, char** argv){
 
 	CommandLineParser cmd(argc, argv, keys);
 
-	bool inputVideoExists = fileExists(cmd.get<string>("vidFile"));
-	if (cmd.get<bool>("help") || !inputVideoExists) {
-		std::cout << "USAGE: " << argv[0] << " [OPTIONS]" << std::endl;
-		cmd.printParams();
-		return 0;
-	}
+	PRINT_HELP_IF_FLAGGED(cmd);
 
-	string vidFile = cmd.get<string>("vidFile");
-	string xFlowFile = cmd.get<string>("xFlowFile");
-	string yFlowFile = cmd.get<string>("yFlowFile");
+	path vidFile = canonicalPath(cmd.get<string>("vidFile"));
+	path xFlowFile = absolutePath(cmd.get<string>("xFlowFile"));
+	path yFlowFile = absolutePath(cmd.get<string>("yFlowFile"));
 	string output_style = cmd.get<string>("out");
 	int bound = cmd.get<int>("bound");
-    int type  = cmd.get<int>("type");
-    int device_id = cmd.get<int>("device_id");
-    int step = cmd.get<int>("step");
+  int type  = cmd.get<int>("type");
+  int device_id = cmd.get<int>("device_id");
+  int step = cmd.get<int>("step");
 
 	vector<vector<uchar> > out_vec_x, out_vec_y;
 
-	calcDenseWarpFlowGPU(vidFile, bound, type, step, device_id,
+  CHECK_FILE_EXISTS_OR_EXIT(vidFile);
+
+  cout << "Calculating optical flow of " << vidFile << endl;
+	calcDenseWarpFlowGPU(vidFile.string(), bound, type, step, device_id,
 					 out_vec_x, out_vec_y);
 
-	if (output_style == "dir") {
-		writeImages(out_vec_x, xFlowFile);
-		writeImages(out_vec_y, yFlowFile);
-	}else{
-//		LOG(INFO)<<"Writing results to Zip archives";
-		writeZipFile(out_vec_x, "x_%05d.jpg", xFlowFile+".zip");
-		writeZipFile(out_vec_y, "y_%05d.jpg", yFlowFile+".zip");
-	}
+	writeFlow(output_style, out_vec_x, xFlowFile, "x_%05d.jpg");
+	writeFlow(output_style, out_vec_y, yFlowFile, "y_%05d.jpg");
 
 	return 0;
 }

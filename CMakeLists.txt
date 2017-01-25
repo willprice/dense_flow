@@ -19,7 +19,7 @@ find_package( OpenCV REQUIRED )
 find_package( LibZip REQUIRED )
 
 # BOOST
-FIND_PACKAGE(Boost REQUIRED python)
+FIND_PACKAGE(Boost COMPONENTS system filesystem python REQUIRED)
 FIND_PACKAGE(PythonLibs REQUIRED)
 
 if(LIBZIP_VERSION VERSION_LESS 0.11)
@@ -31,7 +31,11 @@ include_directories( ${OpenCV_INCLUDE_DIRS} ${LIBZIP_INCLUDE_DIR_ZIP} ${LIBZIP_I
 include_directories(SYSTEM ${Boost_INCLUDE_DIR} ${PYTHON_INCLUDE_DIR})
 
 add_library(denseflow src/common.cpp src/dense_flow.cpp src/dense_flow_gpu.cpp src/dense_warp_flow_gpu.cpp src/zip_utils.cpp)
-target_link_libraries( denseflow ${OpenCV_LIBS} ${LIBZIP_LIBRARY})
+target_link_libraries(denseflow ${OpenCV_LIBS} ${LIBZIP_LIBRARY})
+
+add_library(utils src/file_utils.cpp src/image_writers.cpp src/zip_utils.cpp)
+target_link_libraries(utils ${OpenCV_LIBS} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} ${LIBZIP_LIBRARY})
+
 
 add_library(pydenseflow SHARED src/py_denseflow.cpp)
 target_link_libraries(pydenseflow
@@ -39,11 +43,11 @@ target_link_libraries(pydenseflow
         ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${OpenCV_LIBS}
         )
 
-add_executable( extract_cpu tools/extract_flow.cpp)
-target_link_libraries( extract_cpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} denseflow)
+add_executable(extract_cpu tools/extract_flow.cpp)
+target_link_libraries(extract_cpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} denseflow utils)
 
-add_executable( extract_gpu tools/extract_flow_gpu.cpp)
-target_link_libraries( extract_gpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} denseflow)
+add_executable(extract_gpu tools/extract_flow_gpu.cpp)
+target_link_libraries( extract_gpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} ${Boost_SYSTEM_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} denseflow utils)
 
-add_executable( extract_warp_gpu tools/extract_warp_flow_gpu.cpp)
-target_link_libraries( extract_warp_gpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} denseflow)
+add_executable(extract_warp_gpu tools/extract_warp_flow_gpu.cpp)
+target_link_libraries( extract_warp_gpu ${OpenCV_LIBS} ${LIBZIP_LIBRARY} ${Boost_FILESYSTEM_LIBRARY} denseflow utils)
