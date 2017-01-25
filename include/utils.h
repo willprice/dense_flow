@@ -8,5 +8,6 @@
 #include "common.h"
 
 void writeZipFile(vector<vector<uchar> >& data, string name_temp, string archive_name);
+bool fileExists(string path);
 
 #endif //DENSEFLOW_UTILS_H

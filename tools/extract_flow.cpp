@@ -1,5 +1,9 @@
 #include "dense_flow.h"
 #include "utils.h"
+
+
+bool fileExists(string path);
+
 INITIALIZE_EASYLOGGINGPP
 
 int main(int argc, char** argv)
@@ -8,15 +12,24 @@ int main(int argc, char** argv)
 
 	const char* keys =
 		{
+      "{ h  | help         | false   | print help message}"
 			"{ f  | vidFile      | ex2.avi | filename of video }"
-			"{ x  | xFlowFile    | flow_x | filename of flow x component }"
-			"{ y  | yFlowFile    | flow_y | filename of flow x component }"
-			"{ i  | imgFile      | flow_i | filename of flow image}"
-			"{ b  | bound | 15 | specify the maximum of optical flow}"
-			"{ o  | out | zip | output style}"
+			"{ x  | xFlowFile    | flow_x  | filename of flow x component }"
+			"{ y  | yFlowFile    | flow_y  | filename of flow x component }"
+			"{ i  | imgFile      | flow_i  | filename of flow image}"
+			"{ b  | bound        | 15      | specify the maximum of optical flow}"
+			"{ o  | out          | zip     | output style}"
 		};
 
 	CommandLineParser cmd(argc, argv, keys);
+
+	bool inputVideoExists = fileExists(cmd.get<string>("vidFile"));
+	if (cmd.get<bool>("help") || !inputVideoExists) {
+		std::cout << "USAGE: " << argv[0] << " [OPTIONS]" << std::endl;
+		cmd.printParams();
+    return 0;
+	}
+
 	string vidFile = cmd.get<string>("vidFile");
 	string xFlowFile = cmd.get<string>("xFlowFile");
 	string yFlowFile = cmd.get<string>("yFlowFile");
@@ -34,7 +47,7 @@ int main(int argc, char** argv)
 		writeImages(out_vec_x, xFlowFile);
 		writeImages(out_vec_y, yFlowFile);
 		writeImages(out_vec_img, imgFile);
-	}else{
+	} else{
 //		LOG(INFO)<<"Writing results to Zip archives";
 		writeZipFile(out_vec_x, "x_%05d.jpg", xFlowFile+".zip");
 		writeZipFile(out_vec_y, "y_%05d.jpg", yFlowFile+".zip");
@@ -42,3 +55,4 @@ int main(int argc, char** argv)
 	}
 	return 0;
 }
+

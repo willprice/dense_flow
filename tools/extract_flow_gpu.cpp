@@ -9,6 +9,7 @@ int main(int argc, char** argv){
 	// IO operation
 	const char* keys =
 		{
+      "{ h  | help         | false   | print help message}"
 			"{ f  | vidFile      | ex2.avi | filename of video }"
 			"{ x  | xFlowFile    | flow_x | filename of flow x component }"
 			"{ y  | yFlowFile    | flow_y | filename of flow x component }"
@@ -23,6 +24,14 @@ int main(int argc, char** argv){
 		};
 
 	CommandLineParser cmd(argc, argv, keys);
+
+	bool inputVideoExists = fileExists(cmd.get<string>("vidFile"));
+	if (cmd.get<bool>("help") || !inputVideoExists) {
+		std::cout << "USAGE: " << argv[0] << " [OPTIONS]" << std::endl;
+		cmd.printParams();
+		return 0;
+	}
+
 	string vidFile = cmd.get<string>("vidFile");
 	string xFlowFile = cmd.get<string>("xFlowFile");
 	string yFlowFile = cmd.get<string>("yFlowFile");

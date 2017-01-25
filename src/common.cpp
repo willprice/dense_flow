@@ -3,6 +3,7 @@
 //
 
 #include "common.h"
+#include <sys/stat.h>
 
 void convertFlowToImage(const Mat &flow_x, const Mat &flow_y, Mat &img_x, Mat &img_y,
                                double lowerBound, double higherBound) {
@@ -60,3 +61,7 @@ void writeImages(vector<vector<uchar>> images, string name_temp){
     }
 }
 
+bool fileExists(string path) {
+  struct stat buffer;
+  return (stat(path.c_str(), &buffer) == 0);
+}
